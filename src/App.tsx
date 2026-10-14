@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
@@ -43,6 +43,7 @@ function useKeyboard() {
           break;
       }
     };
+
     const onKeyUp = (event: KeyboardEvent) => {
       switch (event.code) {
         case 'KeyW':

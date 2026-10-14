@@ -17,7 +17,7 @@
   backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 18px 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .garage-overlay h3 {
@@ -76,7 +76,7 @@ button.active {
 canvas {
   display: block;
   height: 100vh !important;
-  width: calc(100vw - 0px) !important;
+  width: 100vw !important;
   flex: 1;
 }
 
@@ -85,6 +85,5 @@ canvas {
     width: calc(100vw - 24px);
     top: 12px;
     left: 12px;
-    right: 12px;
   }
 }

@@ -1,12 +1,12 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Physics, useBox, usePlane } from '@react-three/cannon';
 import './App.css';
 
 type CarKey = 'coupe90' | 'gt46';
-type SpoilerType = 'stock' | 'big_wing' | 'none';
+type SpoilerType = 'stock' | 'big_wing';
 
 function useKeyboard() {
   const keys = useRef({
@@ -18,7 +18,7 @@ function useKeyboard() {
   });
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.code) {
         case 'KeyW':
         case 'ArrowUp':
@@ -44,7 +44,7 @@ function useKeyboard() {
       }
     };
 
-    const onKeyUp = (event: KeyboardEvent) => {
+    const handleKeyUp = (event: KeyboardEvent) => {
       switch (event.code) {
         case 'KeyW':
         case 'ArrowUp':
@@ -70,11 +70,12 @@ function useKeyboard() {
       }
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
@@ -82,7 +83,10 @@ function useKeyboard() {
 }
 
 function Ground() {
-  usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], position: [0, 0, 0] }));
+  usePlane(() => ({
+    rotation: [-Math.PI / 2, 0, 0],
+    position: [0, 0, 0],
+  }));
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
@@ -92,12 +96,12 @@ function Ground() {
   );
 }
 
-function RoadStrip() {
+function Road() {
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <planeGeometry args={[120, 120]} />
-        <meshStandardMaterial color="#1d1d1d" roughness={0.9} />
+        <meshStandardMaterial color="#1d1d1d" roughness={0.95} />
       </mesh>
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
@@ -105,23 +109,23 @@ function RoadStrip() {
         <meshStandardMaterial color="#2c2c2c" />
       </mesh>
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.045, 0]}>
-        <planeGeometry args={[0.3, 120]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+        <planeGeometry args={[0.24, 120]} />
         <meshStandardMaterial color="#f0f0f0" />
       </mesh>
     </group>
   );
 }
 
-function Wheel({ radius = 0.38 }: { radius?: number }) {
+function Wheel() {
   return (
     <group>
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[radius, radius, 0.44, 28]} />
+        <cylinderGeometry args={[0.38, 0.38, 0.42, 28]} />
         <meshStandardMaterial color="#090909" metalness={0.8} roughness={0.38} />
       </mesh>
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.03]}>
-        <cylinderGeometry args={[radius * 0.38, radius * 0.38, 0.4, 18]} />
+        <cylinderGeometry args={[0.18, 0.18, 0.38, 18]} />
         <meshStandardMaterial color="#d4d4d4" metalness={0.96} roughness={0.18} />
       </mesh>
     </group>
@@ -129,47 +133,47 @@ function Wheel({ radius = 0.38 }: { radius?: number }) {
 }
 
 function CarShell({
-  color = '#e84545',
-  width = 2,
-  height = 0.62,
-  length = 4,
+  color,
+  width,
+  height,
+  length,
 }: {
-  color?: string;
-  width?: number;
-  height?: number;
-  length?: number;
+  color: string;
+  width: number;
+  height: number;
+  length: number;
 }) {
   return (
     <group>
       <mesh position={[0, 0.42, 0]} castShadow>
         <boxGeometry args={[width, height, length]} />
-        <meshStandardMaterial color={color} metalness={0.62} roughness={0.28} />
+        <meshStandardMaterial color={color} metalness={0.6} roughness={0.28} />
       </mesh>
 
-      <mesh position={[0, 0.92, 0.2]} castShadow>
-        <boxGeometry args={[width * 0.9, height * 0.76, length * 0.6]} />
-        <meshStandardMaterial color={color} metalness={0.5} roughness={0.22} />
+      <mesh position={[0, 0.92, 0.18]} castShadow>
+        <boxGeometry args={[width * 0.88, height * 0.72, length * 0.6]} />
+        <meshStandardMaterial color={color} metalness={0.52} roughness={0.22} />
       </mesh>
 
       <mesh position={[0, 0.82, 0.18]}>
-        <boxGeometry args={[width * 0.82, height * 0.42, length * 0.5]} />
+        <boxGeometry args={[width * 0.8, height * 0.36, length * 0.46]} />
         <meshStandardMaterial color="#0d1a2e" metalness={0.12} roughness={0.12} transparent opacity={0.9} />
       </mesh>
 
       <mesh position={[0, 0.56, -length * 0.38]}>
         <boxGeometry args={[width * 0.9, height * 0.18, length * 0.28]} />
-        <meshStandardMaterial color={color} metalness={0.6} roughness={0.24} />
+        <meshStandardMaterial color={color} metalness={0.58} roughness={0.24} />
       </mesh>
 
       <mesh position={[0, 0.56, length * 0.4]}>
-        <boxGeometry args={[width * 0.8, height * 0.14, length * 0.22]} />
-        <meshStandardMaterial color={color} metalness={0.6} roughness={0.24} />
+        <boxGeometry args={[width * 0.8, height * 0.14, length * 0.2]} />
+        <meshStandardMaterial color={color} metalness={0.58} roughness={0.24} />
       </mesh>
     </group>
   );
 }
 
-function DetailedCarVisual({ variant, spoiler }: { variant: CarKey; spoiler: SpoilerType }) {
+function CarVisual({ variant, spoiler }: { variant: CarKey; spoiler: SpoilerType }) {
   const isGT = variant === 'gt46';
   const width = isGT ? 2.08 : 1.95;
   const length = isGT ? 4.28 : 3.9;
@@ -241,7 +245,17 @@ function DetailedCarVisual({ variant, spoiler }: { variant: CarKey; spoiler: Spo
   );
 }
 
-function PhysicsCar({ variant, spoiler, externalRef }: { variant: CarKey; spoiler: SpoilerType; externalRef?: React.RefObject<any> }) {
+function PhysicsCar({
+  variant,
+  spoiler,
+  engineStage,
+  carTargetRef,
+}: {
+  variant: CarKey;
+  spoiler: SpoilerType;
+  engineStage: number;
+  carTargetRef?: React.RefObject<any>;
+}) {
   const [ref, api] = useBox(() => ({
     mass: 1200,
     position: [0, 0.95, 0],
@@ -251,19 +265,19 @@ function PhysicsCar({ variant, spoiler, externalRef }: { variant: CarKey; spoile
   }));
 
   useEffect(() => {
-    if (!externalRef) return;
-    // @ts-ignore
-    externalRef.current = ref.current;
-  }, [externalRef, ref]);
+    if (carTargetRef) {
+      carTargetRef.current = ref.current;
+    }
+  }, [carTargetRef, ref]);
 
   const keys = useKeyboard();
   const velocity = useRef<[number, number, number]>([0, 0, 0]);
 
   useEffect(() => {
-    const unsub = api.velocity.subscribe((v) => {
+    const unsubscribe = api.velocity.subscribe((v) => {
       velocity.current = v as [number, number, number];
     });
-    return unsub;
+    return unsubscribe;
   }, [api]);
 
   useFrame(() => {
@@ -274,7 +288,7 @@ function PhysicsCar({ variant, spoiler, externalRef }: { variant: CarKey; spoile
 
     const directionMultiplier = forward === -1 ? 0.6 : 1;
     const baseEngineForce = 3000;
-    const engineMultiplier = variant === 'gt46' ? 1.25 : 1.0;
+    const engineMultiplier = 1 + (engineStage - 1) * 0.18;
     const engineForce = baseEngineForce * engineMultiplier * directionMultiplier * forward;
 
     if (engineForce !== 0) {
@@ -305,7 +319,7 @@ function PhysicsCar({ variant, spoiler, externalRef }: { variant: CarKey; spoile
 
   return (
     <group ref={ref}>
-      <DetailedCarVisual variant={variant} spoiler={spoiler} />
+      <CarVisual variant={variant} spoiler={spoiler} />
     </group>
   );
 }
@@ -318,6 +332,7 @@ function FollowCamera({ targetRef }: { targetRef: React.RefObject<any> | null })
     (targetRef.current as THREE.Object3D).getWorldPosition(pos);
     const desired = pos.clone().add(new THREE.Vector3(0, 4.8, 10.0));
     camera.position.lerp(desired, 0.08);
+
     const lookAt = pos.clone().add(new THREE.Vector3(0, 1.2, 0));
     camera.lookAt(lookAt);
   });
@@ -327,18 +342,18 @@ function FollowCamera({ targetRef }: { targetRef: React.RefObject<any> | null })
 
 function GarageOverlay({
   selected,
-  setSelected,
+  onSelect,
   spoiler,
-  setSpoiler,
+  onSpoilerChange,
   engineStage,
-  setEngineStage,
+  onEngineStage,
 }: {
   selected: CarKey;
-  setSelected: (car: CarKey) => void;
+  onSelect: (next: CarKey) => void;
   spoiler: SpoilerType;
-  setSpoiler: (value: SpoilerType) => void;
+  onSpoilerChange: (next: SpoilerType) => void;
   engineStage: number;
-  setEngineStage: (value: number | ((prev: number) => number)) => void;
+  onEngineStage: (next: number | ((prev: number) => number)) => void;
 }) {
   return (
     <div className="garage-overlay">
@@ -347,10 +362,10 @@ function GarageOverlay({
       <div className="panel-block">
         <div className="label">Car</div>
         <div className="button-row">
-          <button className={selected === 'coupe90' ? 'active' : ''} onClick={() => setSelected('coupe90')}>
+          <button className={selected === 'coupe90' ? 'active' : ''} onClick={() => onSelect('coupe90')}>
             Coupe 90
           </button>
-          <button className={selected === 'gt46' ? 'active' : ''} onClick={() => setSelected('gt46')}>
+          <button className={selected === 'gt46' ? 'active' : ''} onClick={() => onSelect('gt46')}>
             GT 46
           </button>
         </div>
@@ -359,10 +374,10 @@ function GarageOverlay({
       <div className="panel-block">
         <div className="label">Aero</div>
         <div className="button-row">
-          <button className={spoiler === 'stock' ? 'active' : ''} onClick={() => setSpoiler('stock')}>
+          <button className={spoiler === 'stock' ? 'active' : ''} onClick={() => onSpoilerChange('stock')}>
             Stock
           </button>
-          <button className={spoiler === 'big_wing' ? 'active' : ''} onClick={() => setSpoiler('big_wing')}>
+          <button className={spoiler === 'big_wing' ? 'active' : ''} onClick={() => onSpoilerChange('big_wing')}>
             Big Wing
           </button>
         </div>
@@ -371,8 +386,8 @@ function GarageOverlay({
       <div className="panel-block">
         <div className="label">Engine stage: {engineStage}</div>
         <div className="button-row">
-          <button onClick={() => setEngineStage((prev) => Math.min(3, prev + 1))}>Upgrade</button>
-          <button onClick={() => setEngineStage(1)}>Reset</button>
+          <button onClick={() => onEngineStage((prev) => Math.min(3, prev + 1))}>Upgrade</button>
+          <button onClick={() => onEngineStage(1)}>Reset</button>
         </div>
       </div>
 
@@ -385,17 +400,17 @@ export default function App() {
   const [selected, setSelected] = useState<CarKey>('coupe90');
   const [spoiler, setSpoiler] = useState<SpoilerType>('stock');
   const [engineStage, setEngineStage] = useState(1);
-  const carRef = useRef<any>(null);
+  const carTargetRef = useRef<any>(null);
 
   return (
     <div className="game-shell">
       <GarageOverlay
         selected={selected}
-        setSelected={setSelected}
+        onSelect={setSelected}
         spoiler={spoiler}
-        setSpoiler={setSpoiler}
+        onSpoilerChange={setSpoiler}
         engineStage={engineStage}
-        setEngineStage={setEngineStage}
+        onEngineStage={setEngineStage}
       />
 
       <Canvas shadows camera={{ position: [0, 6, 12], fov: 60 }}>
@@ -407,9 +422,9 @@ export default function App() {
         <Suspense fallback={<Html center>Loading scene...</Html>}>
           <Physics gravity={[0, -9.81, 0]}>
             <Ground />
-            <RoadStrip />
-            <PhysicsCar variant={selected} spoiler={spoiler} externalRef={carRef} />
-            <FollowCamera targetRef={carRef} />
+            <Road />
+            <PhysicsCar variant={selected} spoiler={spoiler} engineStage={engineStage} carTargetRef={carTargetRef} />
+            <FollowCamera targetRef={carTargetRef} />
           </Physics>
         </Suspense>
       </Canvas>
